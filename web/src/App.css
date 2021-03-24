@@ -1,6 +1,6 @@
 .App-header {
   background-color: #282c34;
-  min-height: 5vh;
+  min-height: 6vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -23,4 +23,20 @@
 }
 .toolbar-class {
   border: 1px solid #ccc;
+}
+
+.title{
+  position: absolute;
+  top: 5px;
+  left: 20px;
+}
+
+.login{
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
+::marker{
+  display: none;
 }

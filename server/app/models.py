@@ -36,7 +36,7 @@ class User(db.Model):
 class Post(db.Model):
     __tablename__ = "posts"
     id = db.Column(db.Integer, primary_key=True)
-    post = db.Column(db.String(50))
+    post = db.Column(db.String(5000))
     creation_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_modified = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
