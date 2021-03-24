@@ -1,26 +1,10 @@
 import React, { useEffect, useState } from "react";
 import API from "../utils/API";
 
-const fetchEntries = async (userId) => {
-  const res = await API.get("/posts", {
-    params: {
-      user_id: userId,
-    }
-  });
-  return res.data;
-};
 
 const Timeline = (props) => {
-  const [entries, setEntries] = useState([""]);
+  
   const [entriesMarkup, setEntriesMarkup] = useState([""]);
-
-  useEffect(() => {
-    setEntries(fetchEntries(props.userId));
-  }, [props.userId]);
-
-  useEffect(() => {
-    setEntries([props.latestEntry, ...entries]);
-  }, [props.latestEntry]);
 
   useEffect(() => {
     setEntriesMarkup(entries.map((item) => (
@@ -30,15 +14,18 @@ const Timeline = (props) => {
         <hr />
       </li>
     )));
-  }, [entries]);
-  
-
+  }, [props.entries]);
   
   return (
+  <>
+  {entriesMarkup !== [] ?
     <div>
       <h2>My Timeline</h2>
       {entriesMarkup}
     </div>
+    : <h3>We are waiting for your first Journal Entry!</h3>
+  }
+  </>
   );
 };
 
