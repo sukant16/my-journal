@@ -1,13 +1,14 @@
-import React, { useState,  useEffect   } from 'react';
+import React, { useState } from 'react';
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { convertToHTML } from 'draft-convert';
+import PropTypes from "prop-types";
 
 import API from "../utils/API"
 
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 
-const Editor = (props) => {
+const JournalEditor = (props) => {
   const [editorState, setEditorState] = useState(
     () => EditorState.createEmpty(),
   );
@@ -32,7 +33,8 @@ const Editor = (props) => {
     }
     try {
       const res = await API.post('posts', data)
-      props.onEntrySubmit(res.data);
+      props.onNewEntrySubmit(res.data);
+      setEditorState(EditorState.createEmpty());
     } catch  (e){
       console.log('creating new post failed:', e);
     }    
@@ -55,4 +57,11 @@ const Editor = (props) => {
   
   )
 }
-export default Editor;
+
+
+JournalEditor.propTypes = {
+  userId: PropTypes.string,
+  onNewEntrySubmit: PropTypes.func,
+}
+
+export default JournalEditor;

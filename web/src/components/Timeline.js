@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
-import API from "../utils/API";
-
+import PropTypes from "prop-types";
 
 const Timeline = (props) => {
   
   const [entriesMarkup, setEntriesMarkup] = useState([""]);
 
   useEffect(() => {
-    setEntriesMarkup(entries.map((item) => (
+    console.log(props.entries);
+    const entriesLi = props.entries.map((item) => (
       <li key={item.last_modified}>
         <h4>Entry @{item.creation_date}</h4>
         <p>{item.post}</p>
         <hr />
       </li>
-    )));
-  }, [props.entries]);
+    ));
+    setEntriesMarkup(entriesLi);
+}, [props.entries]);
   
   return (
   <>
@@ -28,5 +29,10 @@ const Timeline = (props) => {
   </>
   );
 };
+
+
+  Timeline.propTypes = {
+    entries: PropTypes.array,
+  }
 
 export default Timeline;

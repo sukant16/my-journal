@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 import Timeline from "./components/Timeline";
-import Editor from "./components/Editor";
+import JournalEditor from "./components/Editor";
+import API from "./utils/API"
 
 import "./App.css";
 
@@ -15,11 +16,15 @@ const fetchEntries = async (userId) => {
 };
 
 const App = () => {
-  const userId = 1;
-  const [entries, setEntries] = useState([""]);
+  const userId = "1";
+  const [entries, setEntries] = useState([]);
 
   useEffect(() => {
-    setEntries(fetchEntries(1));
+    const fetchData = async () => {
+      const data = await fetchEntries(userId);
+      setEntries(data);
+    }
+    fetchData();
   }, []);
 
   const handleNewEntry = (newEntry) => {
@@ -33,9 +38,10 @@ const App = () => {
           <span className="login">Login</span>
         </div>
       </header>
-      <Editor onNewEntrySubmit={handleNewEntry} userId={userId} />
+      <JournalEditor onNewEntrySubmit={handleNewEntry} userId={userId} />
       <Timeline entries={entries} />
     </div>
   );
 };
+
 export default App;
