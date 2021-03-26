@@ -36,6 +36,11 @@
   top: 5px;
   right: 10px;
 }
+.logout{
+  position: absolute;
+  top: 5px;
+  right: 100px;
+}
 
 ::marker{
   display: none;

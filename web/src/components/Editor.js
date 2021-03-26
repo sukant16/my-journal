@@ -12,7 +12,7 @@ const JournalEditor = (props) => {
   const [editorState, setEditorState] = useState(
     () => EditorState.createEmpty(),
   );
-
+  console.log(editorState);
   const [convertedContent, setConvertedContent] = useState("");
 
   const handleEditorChange = (state) => {
@@ -34,7 +34,7 @@ const JournalEditor = (props) => {
     try {
       const res = await API.post('posts', data)
       props.onNewEntrySubmit(res.data);
-      setEditorState(EditorState.createEmpty());
+      // setEditorState({});
     } catch  (e){
       console.log('creating new post failed:', e);
     }    
