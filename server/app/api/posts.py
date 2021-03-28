@@ -10,12 +10,22 @@ from server.app.models import Post, User
 from server.app.api.errors import bad_request
 from server.app.api import posts_bp
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 
 @posts_bp.route("/posts/<int:id>", methods=["GET"])
 def get_post(id):
-    return Post.query.get_or_404(id).to_dict()
+    post_data = Post.query.get_or_404(id).to_dict()
+    drive_service = build('drive', 'v3', credentials=session.get('credentials'))
+    request = drive_service.files().get_media(fileId=post_data['post_file_id'])
+    text_stream = BytesIO()
+    downloader = MediaIoBaseDownload(text_stream, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+    if done == True:
+        post_data['post_text'] = text_stream.getvalue().decode('utf-8')
+    return post_data
 
 
 @posts_bp.route('/posts', methods=['GET'])
@@ -29,8 +39,19 @@ def get_posts() -> List:
         return bad_request('must provide user_id')
     posts = Post.query.filter(User.id == user_id)
     response = []
+    drive_service = build('drive', 'v3', credentials=session.get('credentials'))
+
     for post in posts:
-        response.append(post.to_dict())
+        post_data = post.to_dict()
+        request = drive_service.files().get_media(fileId=post_data['post_file_id'])
+        text_stream = BytesIO()
+        downloader = MediaIoBaseDownload(text_stream, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        if done == True:
+            post_data['post_text'] = text_stream.getvalue().decode('utf-8')
+            response.append(post_data)
     response = jsonify(response)
     return response
 
@@ -48,15 +69,14 @@ def create_post():
         'parents': ['appDataFolder']
     }
     # TODO: handle errors failure to upload 
-    media = MediaFileUpload(post_bytes,
-                            mimetype='application/octet-stream')
+    media = MediaIoBaseUpload(post_bytes, mimetype='application/octet-stream')
 
     file = drive_service.files().create(body=file_metadata,
                                         media_body=media,
                                         fields='id').execute()
     _ = data.pop('post')
-    data['post_filename'] = filename
-    data['post_file_id'] = file['id']
+    data['post_gdrive_name'] = filename
+    data['post_gdrive_id'] = file['id']
     post = Post()
     post.from_dict(data)
     db.session.add(post)

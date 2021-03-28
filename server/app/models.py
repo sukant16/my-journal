@@ -36,8 +36,8 @@ class User(db.Model):
 class Post(db.Model):
     __tablename__ = "posts"
     id = db.Column(db.Integer, primary_key=True)
-    post_filename = db.Column(db.String(50))
-    post_file_id = db.Column(db.String(100))
+    post_gdrive_name = db.Column(db.String(50))
+    post_gdrive_id = db.Column(db.String(100))
     creation_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_modified = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -48,8 +48,8 @@ class Post(db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
-            'post_filename': self.post_filename,
-            'post_file_id': self.post_file_id,
+            'post_gdrive_name': self.post_gdrive_name,
+            'post_gdrive_id': self.post_gdrive_id,
             'creation_date': self.creation_date,
             'last_modified': self.last_modified
         }
