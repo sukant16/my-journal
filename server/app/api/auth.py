@@ -109,7 +109,9 @@ def refresh_tokens():
             + "testing the code to revoke credentials."
         )
     credentials = Credentials(**session["credentials"])
-
+    if not credentials or not credentials.valid:
+        credentials.refresh(Request())
+        session['id_token'] = credentials.id_token  
 
 @auth_bp.route("/revoke")
 def revoke():
@@ -148,6 +150,5 @@ def credentials_to_dict(credentials):
         "token_uri": credentials.token_uri,
         "client_id": credentials.client_id,
         "client_secret": credentials.client_secret,
-        "scopes": credentials.scopes,
-        "id_token": credentials.id_token,
+        "scopes": credentials.scopes
     }

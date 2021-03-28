@@ -10,12 +10,13 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
+    picture = db.Column(db.String(1000))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return f'<User {self.username}>'
 
-    def to_dict(self, include_email=False):
+    def to_dict(self, include_email=False, include_picture=False):
         data = {
             'id': self.id,
             'username': self.username,
@@ -25,6 +26,8 @@ class User(db.Model):
         }
         if include_email:
             data['email'] = self.email
+        if include_email:
+            data['picture'] = self.picture
         return data
 
     def from_dict(self, data):
