@@ -11,12 +11,13 @@ from server.app.api.errors import bad_request
 from server.app.api import posts_bp
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
+from google.oauth2.credentials import Credentials
 
 
 @posts_bp.route("/posts/<int:id>", methods=["GET"])
 def get_post(id):
     post_data = Post.query.get_or_404(id).to_dict()
-    drive_service = build("drive", "v3", credentials=session.get("credentials"))
+    drive_service = build("drive", "v3", credentials=Credentials(**session.get("credentials")))
     request = drive_service.files().get_media(fileId=post_data["post_file_id"])
     text_stream = BytesIO()
     downloader = MediaIoBaseDownload(text_stream, request)
@@ -39,7 +40,10 @@ def get_posts() -> List:
         return bad_request("must provide user_id")
     posts = Post.query.filter(User.id == user_id)
     response = []
-    drive_service = build("drive", "v3", credentials=session.get("credentials"))
+    print(session)
+    print(session['credentials'])
+    print(Credentials(**session['credentials']))
+    drive_service = build("drive", "v3", credentials=Credentials(**session.get("credentials")))
 
     for post in posts:
         post_data = post.to_dict()
@@ -52,6 +56,7 @@ def get_posts() -> List:
         if done == True:
             post_data["post_text"] = text_stream.getvalue().decode("utf-8")
             response.append(post_data)
+    print(response)
     response = jsonify(response)
     return response
 
@@ -61,11 +66,15 @@ def create_post():
     data = request.json or {}
     if "post" not in data or "user_id" not in data:
         return bad_request("must include post and user_id fields")
-    drive_service = build("drive", "v3", credentials=session.get("credentials"))
+    print(session)
+    print(session['credentials'])
+    # print(Credentials(**session['credentials']))
+    drive_service = build("drive", "v3", credentials=Credentials(**session.get("credentials")))
     filename: str = datetime.utcnow().strftime("%Y-%m-%d_%H:%M:%S") + ".bin"
     post_bytes = BytesIO(data["post"].encode("utf-8"))
     file_metadata = {"name": filename, "parents": ["appDataFolder"]}
     # TODO: handle errors failure to upload
+
     media = MediaIoBaseUpload(post_bytes, mimetype="application/octet-stream")
 
     file = (
@@ -77,6 +86,7 @@ def create_post():
     _ = data.pop("post")
     data["post_gdrive_name"] = filename
     data["post_gdrive_id"] = file["id"]
+    print(data)
     post = Post()
     post.from_dict(data)
     db.session.add(post)

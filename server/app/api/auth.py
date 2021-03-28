@@ -46,6 +46,7 @@ def test_api_request():
     # ACTION ITEM: In a production app, you likely want to save these
     #              credentials in a persistent database instead.
     session["credentials"] = credentials_to_dict(credentials)
+    print(session)
 
     return jsonify(**files)
 
@@ -96,7 +97,6 @@ def oauth2callback():
     credentials = flow.credentials
     session["credentials"] = credentials_to_dict(credentials)
     session["id_token"] = credentials.id_token
-    print(session["id_token"])
 
     return redirect(url_for("auth.test_api_request"))
 
