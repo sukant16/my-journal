@@ -1,8 +1,8 @@
 from flask import Blueprint
 
-users_bp = Blueprint('users', __name__)
-posts_bp = Blueprint('posts', __name__)
-auth_bp = Blueprint('auth', __name__)
+users_bp = Blueprint("users", __name__)
+posts_bp = Blueprint("posts", __name__)
+auth_bp = Blueprint("auth", __name__)
 
 
 from server.app.api import posts, users, errors, auth
