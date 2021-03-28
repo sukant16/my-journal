@@ -13,8 +13,15 @@ Werkzeug = "==1.0.1"
 python-dotenv = "*"
 psycopg2 = "*"
 flask-cors = "*"
+google-api-python-client = "*"
+google-auth = "*"
+google-auth-oauthlib = "*"
+google-auth-httplib2 = "*"
+requests = "*"
 
 [dev-packages]
+ipython = "*"
+black = "*"
 
 [requires]
 python_version = "3.8"

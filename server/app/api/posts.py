@@ -1,12 +1,16 @@
 from datetime import datetime
 from typing import List
+import json
+from io import BytesIO
 
-from flask import url_for, request, jsonify
+from flask import url_for, request, jsonify, session
 
-from app import db
-from app.models import Post, User
-from app.api.errors import bad_request
-from app.api import posts_bp
+from server.app import db
+from server.app.models import Post, User
+from server.app.api.errors import bad_request
+from server.app.api import posts_bp
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 
 @posts_bp.route("/posts/<int:id>", methods=["GET"])
@@ -36,6 +40,23 @@ def create_post():
     data = request.json or {}
     if 'post' not in data or 'user_id' not in data:
         return bad_request('must include post and user_id fields')
+    drive_service = build('drive', 'v3', credentials=session.get('credentials'))
+    filename: str = datetime.utcnow().strftime("%Y-%m-%d_%H:%M:%S") + ".bin"
+    post_bytes = BytesIO(data['post'].encode('utf-8'))
+    file_metadata = {
+        'name': filename,
+        'parents': ['appDataFolder']
+    }
+    # TODO: handle errors failure to upload 
+    media = MediaFileUpload(post_bytes,
+                            mimetype='application/octet-stream')
+
+    file = drive_service.files().create(body=file_metadata,
+                                        media_body=media,
+                                        fields='id').execute()
+    _ = data.pop('post')
+    data['post_filename'] = filename
+    data['post_file_id'] = file['id']
     post = Post()
     post.from_dict(data)
     db.session.add(post)

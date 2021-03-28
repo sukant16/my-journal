@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 # from flask_babel import Babel, lazy_gettext as _l
 # from elasticsearch import Elasticsearch
 # from redis import Redis
-from config import Config
+from server.config import Config
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -44,9 +44,10 @@ def create_app(config_class=Config):
     # from app.errors import errors_bp
     # app.register_blueprint(errors_bp)
 
-    from app.api import users_bp, posts_bp
+    from server.app.api import users_bp, posts_bp, auth_bp
     app.register_blueprint(users_bp, url_prefix='/v1')
     app.register_blueprint(posts_bp, url_prefix='/v1')
+    app.register_blueprint(auth_bp, url_prefix='/v1')
 
     if not app.debug and not app.testing:
         # if app.config['MAIL_SERVER']:
@@ -90,4 +91,4 @@ def create_app(config_class=Config):
 # def get_locale():
 #     return request.accept_languages.best_match(current_app.config['LANGUAGES'])
 
-from app import models
+from server.app import models

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import url_for
 
-from app import db
+from server.app import db
 
 
 class User(db.Model):
@@ -36,7 +36,8 @@ class User(db.Model):
 class Post(db.Model):
     __tablename__ = "posts"
     id = db.Column(db.Integer, primary_key=True)
-    post = db.Column(db.String(5000))
+    post_filename = db.Column(db.String(50))
+    post_file_id = db.Column(db.String(100))
     creation_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_modified = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -47,17 +48,15 @@ class Post(db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
-            'post': self.post,
+            'post_filename': self.post_filename,
+            'post_file_id': self.post_file_id,
             'creation_date': self.creation_date,
-            'last_modified': self.last_modified,
-            '_links': {
-                'self': url_for('posts.get_post', id=self.id),
-            }
+            'last_modified': self.last_modified
         }
         return data
 
     def from_dict(self, data):
-        for field in ['post', 'user_id', 'last_modified']:
+        for field in ['post_filename', 'user_id', 'last_modified']:
             if field in data:
                 setattr(self, field, data[field])
         # if new_post:
