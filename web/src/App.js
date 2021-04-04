@@ -18,24 +18,24 @@ const fetchEntries = async (userId) => {
 };
 
 const App = () => {
-  const userId = "1";
-  const [entries, setEntries] = useState([]);
+  // const userId = "1";
+  // const [entries, setEntries] = useState([]);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchData = async () => {
-      const data = await fetchEntries(userId);
-      if (mounted){
-        setEntries(data);
-      }
-    }
-    fetchData();
-    return () => mounted = false;
-  }, []);
+  // useEffect(() => {
+  //   let mounted = true;
+  //   const fetchData = async () => {
+  //     const data = await fetchEntries(userId);
+  //     if (mounted){
+  //       setEntries(data);
+  //     }
+  //   }
+  //   fetchData();
+  //   return () => mounted = false;
+  // }, []);
 
-  const handleNewEntry = (newEntry) => {
-    setEntries([newEntry, ...entries]);
-  };
+  // const handleNewEntry = (newEntry) => {
+  //   setEntries([newEntry, ...entries]);
+  // };
   return (
     <div className="App">
       <header className="App-header">
@@ -45,8 +45,8 @@ const App = () => {
       </header>
       <Login />
       <Logout />
-      <JournalEditor onNewEntrySubmit={handleNewEntry} userId={userId} />
-      <Timeline entries={entries} />
+      {/* <JournalEditor onNewEntrySubmit={handleNewEntry} userId={userId} /> */}
+      {/* <Timeline entries={entries} /> */}
     </div>
   );
 };

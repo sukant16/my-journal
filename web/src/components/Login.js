@@ -33,7 +33,7 @@ const Login = () => {
         accessType="offline"
         responseType="code"
         prompt="consent"
-        scope="profile email https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.install"
+        // scope="profile email https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.install"
       />
     </div>
   );

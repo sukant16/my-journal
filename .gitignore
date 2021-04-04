@@ -64,3 +64,5 @@ drive/*
 *yarn-debug.log*
 *yarn-error.log*
 *client_secret.json
+
+*/notebooks/*

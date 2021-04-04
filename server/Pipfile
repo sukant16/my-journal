@@ -18,6 +18,7 @@ google-auth = "*"
 google-auth-oauthlib = "*"
 google-auth-httplib2 = "*"
 requests = "*"
+flask-login = "*"
 
 [dev-packages]
 ipython = "*"
@@ -25,3 +26,6 @@ black = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
