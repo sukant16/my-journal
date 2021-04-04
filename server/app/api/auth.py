@@ -2,6 +2,8 @@ import os
 
 from flask import request, redirect, session, url_for, jsonify, current_app
 from flask_login import current_user, login_user, logout_user
+from flask_login.utils import login_required
+from google import auth
 import requests
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
@@ -83,7 +85,7 @@ def oauth2callback():
     credentials = flow.credentials
     # TODO: validate credentials, only then save in session otherwise redirect to auth
     id_info = validate_id_token(credentials.id_token)
-    user = User.query.filter_by(id=id_info["sub"]).first()
+    user = User.query.filter_by(google_id=id_info["sub"]).first()
     if not user:
         user = User(
             google_id=id_info["sub"],
@@ -93,6 +95,8 @@ def oauth2callback():
         )
         db.session.add(user)
         db.session.commit()
+    login_user(user)
+
     session["token"] = credentials.token
     session["refresh_token"] = credentials.refresh_token
     session["id_token"] = credentials.id_token
@@ -142,8 +146,19 @@ def revoke():
         return "An error occurred."
 
 
-@auth_bp.route("/clear")
-def clear_credentials():
-    if "credentials" in session:
-        del session["credentials"]
-    return "Credentials have been cleared.<br><br>"
+@auth_bp.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    if "refresh_token" in session or "token" in session or "id_token" in session:
+        del session["refresh_token"]
+        del session["token"]
+        del session["id_token"]
+    return redirect("https://localhost:3000")
+
+
+# @auth_bp.route("/clear")
+# def clear_credentials():
+#     if "credentials" in session:
+#         del session["credentials"]
+#     return "Credentials have been cleared.<br><br>"
