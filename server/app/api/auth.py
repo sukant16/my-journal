@@ -3,7 +3,6 @@ import os
 from flask import request, redirect, session, url_for, jsonify, current_app
 from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
-from google import auth
 import requests
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
@@ -12,6 +11,7 @@ from google.auth.transport.requests import Request
 
 from . import auth_bp
 from server.app.models import User
+from server.app import config
 from server.app import db
 from .utils.auth import get_client_config, validate_id_token, create_credentials
 
@@ -25,8 +25,8 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 #         return redirect("authorize")
 #     # Load credentials from the session.
 #     # credentials = Credentials(**session["credentials"])
-#     # drive = build(current_app.config['API_SERVICE_NAME'],
-#     #     current_app.config.get("API_VERSION"),
+#     # drive = build(config['API_SERVICE_NAME'],
+#     #     config.get("API_VERSION"),
 #     #     credentials=credentials)
 #     drive = get_drive(session.get("token"), session.get("refresh_token"))
 #     files = drive.files().list().execute()
@@ -43,7 +43,7 @@ def authorize():
 
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
     flow = Flow.from_client_config(
-        get_client_config(), scopes=current_app.config.get("SCOPES")
+        get_client_config(), scopes=config.get("SCOPES")
     )
 
     # TODO: handle 'redirect_uri_mismatch' error
@@ -71,7 +71,7 @@ def oauth2callback():
     state = session["state"]
 
     flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=current_app.config.get("SCOPES"), state=state
+        CLIENT_SECRETS_FILE, scopes=config.get("SCOPES"), state=state
     )
     flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
 
@@ -114,6 +114,7 @@ def refresh_tokens():
     credentials = create_credentials(
         token=session["token"], refresh_token=session["refresh_token"]
     )
+    # TODO: verify tokens
     if not credentials.valid and credentials.refresh_token:
         credentials.refresh(Request())
         session["token"] = credentials.token

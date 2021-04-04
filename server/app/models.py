@@ -15,7 +15,7 @@ def load_user(id):
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    google_id = db.Column(db.String(64), nullable=False, unique=True)
+    google_id = db.Column(db.String(64), unique=True)
     username = db.Column(db.String(120), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     picture = db.Column(db.String(1000))

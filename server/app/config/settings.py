@@ -16,6 +16,7 @@ class Config:
     TOKEN_URI = "https ://oauth2.googleapis.com/token"
     CLIENT_ID = os.environ.get("CLIENT_ID")
     CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+    PROJECT_ID = os.environ.get("PROJECT_ID")
     REDIRECT_URIS = ["http://localhost:5000/v1/oauth2callback"]
     AUTH_PROVIDER_X509_CERT_URL = "https://www.googleapis.com/oauth2/v1/certs"
     SCOPES = [

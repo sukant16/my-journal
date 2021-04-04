@@ -13,7 +13,7 @@ from flask_login import LoginManager
 # from flask_babel import Babel, lazy_gettext as _l
 # from elasticsearch import Elasticsearch
 # from redis import Redis
-from server.config import Config
+from server.app import config
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -28,7 +28,7 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(os.environ.get("APP_CONFIG"))
+    app.config.from_object(config)
     db.init_app(app)
     migrate.init_app(app, db)
     CORS(app)
