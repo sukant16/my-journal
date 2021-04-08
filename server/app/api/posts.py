@@ -1,37 +1,44 @@
 from datetime import datetime
+from logging import log
 from typing import List
 import json
 from io import BytesIO
 
 from flask import url_for, request, jsonify, session
+from flask_login import login_required
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
+from google.oauth2.credentials import Credentials
 
 from server.app import db
 from server.app.models import Post, User
 from server.app.api.errors import bad_request
 from server.app.api import posts_bp
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
-from google.oauth2.credentials import Credentials
+from server.app import config
+from server.app.api.utils.auth import get_drive 
 
 
 @posts_bp.route("/posts/<int:id>", methods=["GET"])
+@login_required
 def get_post(id):
     post_data = Post.query.get_or_404(id).to_dict()
-    drive_service = build(
-        "drive", "v3", credentials=Credentials(**session.get("credentials"))
-    )
-    request = drive_service.files().get_media(fileId=post_data["post_file_id"])
+    # drive_service = build(
+    #     "drive", "v3", credentials=Credentials(**session.get("credentials"))
+    # )
+    drive_service = get_drive(session['token'], session['refresh_token'])
+    request = drive_service.files().get_media(fileId=post_data["post_gdrive_id"])
     text_stream = BytesIO()
     downloader = MediaIoBaseDownload(text_stream, request)
     done = False
     while done is False:
         status, done = downloader.next_chunk()
     if done == True:
-        post_data["post_text"] = text_stream.getvalue().decode("utf-8")
+        post_data["text"] = text_stream.getvalue().decode("utf-8")
     return post_data
 
 
 @posts_bp.route("/posts", methods=["GET"])
+@login_required
 def get_posts() -> List:
     """
     Get all the posts for a given user_id
@@ -43,11 +50,7 @@ def get_posts() -> List:
     posts = Post.query.filter(User.id == user_id)
     response = []
     print(session)
-    print(session["credentials"])
-    print(Credentials(**session["credentials"]))
-    drive_service = build(
-        "drive", "v3", credentials=Credentials(**session.get("credentials"))
-    )
+    drive_service = get_drive(session['token'], session['refresh_token'])
 
     for post in posts:
         post_data = post.to_dict()
@@ -60,22 +63,20 @@ def get_posts() -> List:
         if done == True:
             post_data["post_text"] = text_stream.getvalue().decode("utf-8")
             response.append(post_data)
-    print(response)
+    # print(response)
     response = jsonify(response)
     return response
 
 
 @posts_bp.route("/posts", methods=["POST"])
+@login_required
 def create_post():
     data = request.json or {}
     if "post" not in data or "user_id" not in data:
         return bad_request("must include post and user_id fields")
+
     print(session)
-    print(session["credentials"])
-    # print(Credentials(**session['credentials']))
-    drive_service = build(
-        "drive", "v3", credentials=Credentials(**session.get("credentials"))
-    )
+    drive_service = get_drive(session['token'], session['refresh_token'])
     filename: str = datetime.utcnow().strftime("%Y-%m-%d_%H:%M:%S") + ".bin"
     post_bytes = BytesIO(data["post"].encode("utf-8"))
     file_metadata = {"name": filename, "parents": ["appDataFolder"]}
@@ -103,8 +104,10 @@ def create_post():
     return response
 
 
-@posts_bp.route("/posts/<int:id>", methods=["PATCH"])
-def update_posts(id):
+@posts_bp.route("/posts/<string:gdrive_id>", methods=["PATCH"])
+@login_required
+def update_posts(gdrive_id):
+    
     post = Post.query.get_or_404(id)
     data = request.get_json() or {}
     data["last_modified"] = datetime.utcnow()
@@ -114,6 +117,7 @@ def update_posts(id):
 
 
 @posts_bp.route("/posts/<int:id>", methods=["DELETE"])
+@login_required
 def delete_posts(id):
     # TODO: instead of direct deletion, schedule deletion
     post = Post.query.get_or_404(id)
