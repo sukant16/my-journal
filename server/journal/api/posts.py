@@ -8,14 +8,14 @@ from flask import url_for, request, jsonify, session
 from flask_login import login_required
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
-from google.oauth2.credentials import Credentials
+# from google.oauth2.credentials import Credentials
 
-from server.app import db
-from server.app.models import Post, User
-from server.app.api.errors import bad_request
-from server.app.api import posts_bp
-from server.app import config
-from server.app.api.utils.auth import get_drive 
+from server.journal import db
+from server.journal.models import Post, User
+from server.journal.api.errors import bad_request
+from server.journal.api import posts_bp
+# from server.journal import config
+from server.journal.api.utils.auth import get_drive 
 
 
 @posts_bp.route("/posts/<int:id>", methods=["GET"])
@@ -62,14 +62,14 @@ def get_posts() -> List:
             status, done = downloader.next_chunk()
         if done == True:
             post_data["post_text"] = text_stream.getvalue().decode("utf-8")
-            response.append(post_data)
+            response.journalend(post_data)
     # print(response)
     response = jsonify(response)
     return response
 
 
 @posts_bp.route("/posts", methods=["POST"])
-@login_required
+# @login_required
 def create_post():
     data = request.json or {}
     if "post" not in data or "user_id" not in data:
@@ -98,6 +98,7 @@ def create_post():
     post.from_dict(data)
     db.session.add(post)
     db.session.commit()
+    print(post.to_dict())
     response = jsonify(post.to_dict())
     response.status_code = 201
     response.headers["Location"] = url_for("posts.get_post", id=post.id)

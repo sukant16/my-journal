@@ -25,7 +25,8 @@ class Config:
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/drive.appdata",
         "https://www.googleapis.com/auth/drive.file",
-        "https://www.googleapis.com/auth/drive.install"
+        "https://www.googleapis.com/auth/drive.install",
+        "https://www.googleapis.com/auth/drive.metadata.readonly",
     ]
     API_SERVICE_NAME = "drive"
     API_VERSION = "v3"

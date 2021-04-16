@@ -5,4 +5,4 @@ posts_bp = Blueprint("posts", __name__)
 auth_bp = Blueprint("auth", __name__)
 
 
-from server.app.api import posts, users, errors, auth
+from server.journal.api import posts, users, errors, auth

@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
-from flask import Flask, request, current_app
+from flask import Flask, request, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -13,7 +13,7 @@ from flask_login import LoginManager
 # from flask_babel import Babel, lazy_gettext as _l
 # from elasticsearch import Elasticsearch
 # from redis import Redis
-from server.app import config
+from server.journal import config
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -45,12 +45,26 @@ def create_app():
     # from app.errors import errors_bp
     # app.register_blueprint(errors_bp)
 
-    from server.app.api import users_bp, posts_bp, auth_bp
+    from server.journal.api import users_bp, posts_bp, auth_bp
 
     app.register_blueprint(users_bp, url_prefix="/v1")
     app.register_blueprint(posts_bp, url_prefix="/v1")
     app.register_blueprint(auth_bp, url_prefix="/v1")
 
+    @app.before_request
+    def check_credentials():
+        print(request.endpoint)
+        if not request.endpoint.startswith("auth"):
+            if 'Authorization' in request.headers:
+                session['token'] = request.headers['Authorization'][7:]
+            else:
+                from server.journal.api.errors import error_response
+                return error_response(401, "Please provide valid tokens")
+            
+            if "Refresh-Token" in request.headers:
+                session['refresh_token'] = request.headers['Refresh-Token']
+            print("Proceeding to the route")
+                
     if not app.debug and not app.testing:
         # if app.config['MAIL_SERVER']:
         #     auth = None
@@ -97,4 +111,4 @@ def create_app():
 # def get_locale():
 #     return request.accept_languages.best_match(current_app.config['LANGUAGES'])
 
-from server.app import models
+from server.journal import models

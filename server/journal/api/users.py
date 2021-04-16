@@ -1,9 +1,9 @@
 from flask import url_for, request, jsonify
 
-from server.app import db
-from server.app.models import User
-from server.app.api.errors import bad_request
-from server.app.api import users_bp
+from server.journal import db
+from server.journal.models import User
+from server.journal.api.errors import bad_request
+from server.journal.api import users_bp
 
 
 @users_bp.route("/users/<int:id>", methods=["GET"])

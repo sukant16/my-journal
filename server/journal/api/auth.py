@@ -10,40 +10,31 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 
 from . import auth_bp
-from server.app.models import User
-from server.app import config
-from server.app import db
+from server.journal.models import User
+from server.journal import config
+from server.journal import db
 from .utils.auth import get_client_config, validate_id_token, create_credentials
 
-CLIENT_SECRETS_FILE = "/media/moz/max/projects/my-journal/server/app/client_secret.json"
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+CLIENT_SECRETS_FILE = "/media/moz/max/projects/my-journal/server/journal/client_secret.json"
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
-# @auth_bp.route("/test")
-# def test_api_request():
-#     if "token" not in session:
-#         return redirect("authorize")
-#     # Load credentials from the session.
-#     # credentials = Credentials(**session["credentials"])
-#     # drive = build(config['API_SERVICE_NAME'],
-#     #     config.get("API_VERSION"),
-#     #     credentials=credentials)
-#     drive = get_drive(session.get("token"), session.get("refresh_token"))
-#     files = drive.files().list().execute()
-#     return jsonify(**files)
+@auth_bp.route("/test")
+def test_api_request():
+    return "Welcome to journal"
 
 
 @auth_bp.route("/authorize")
 def authorize():
-    if not current_user.is_anonymous():
-        return redirect("https://localhost:3000")
+    # if not current_user.is_anonymous:
+        # return redirect(url_for("auth.test_api_request"))
 
     # if current_user.is_authenticated:
     #     return redirect("localhost:3000/home")
 
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
     flow = Flow.from_client_config(
-        get_client_config(), scopes=config.get("SCOPES")
+        get_client_config(), scopes=config.SCOPES
     )
 
     # TODO: handle 'redirect_uri_mismatch' error
@@ -64,14 +55,14 @@ def authorize():
 
 @auth_bp.route("/oauth2callback")
 def oauth2callback():
-    if not current_user.is_anonymous:
-        return redirect("https://localhost:3000")
+    # if not current_user.is_anonymous:
+        # return redirect(url_for("auth.test"))
     # Specify the state when creating the flow in the callback so that it can
     # verified in the authorization server response.
     state = session["state"]
 
     flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=config.get("SCOPES"), state=state
+        CLIENT_SECRETS_FILE, scopes=config.SCOPES, state=state
     )
     flow.redirect_uri = url_for("auth.oauth2callback", _external=True)
 
@@ -84,6 +75,7 @@ def oauth2callback():
     #              credentials in a persistent database instead.
     credentials = flow.credentials
     # TODO: validate credentials, only then save in session otherwise redirect to auth
+    
     id_info = validate_id_token(credentials.id_token)
     user = User.query.filter_by(google_id=id_info["sub"]).first()
     if not user:
@@ -96,12 +88,14 @@ def oauth2callback():
         db.session.add(user)
         db.session.commit()
     login_user(user)
-
+    print({"token": credentials.token, 
+            "refresh_token": credentials.refresh_token, 
+            "id_token": credentials.id_token})
     session["token"] = credentials.token
     session["refresh_token"] = credentials.refresh_token
     session["id_token"] = credentials.id_token
 
-    return redirect("https://localhost:3000")
+    return redirect(url_for("auth.test_api_request"))
 
 
 @auth_bp.route("/refresh")

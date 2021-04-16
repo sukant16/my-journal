@@ -1,5 +1,5 @@
-from server.app import create_app, db
-from server.app.models import User, Post
+from server.journal import create_app, db
+from server.journal.models import User, Post
 
 app = create_app()
 

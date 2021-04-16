@@ -3,8 +3,8 @@ from datetime import datetime
 from flask import url_for
 from flask_login import UserMixin
 
-from server.app import db
-from server.app import login_manager
+from server.journal import db
+from server.journal import login_manager
 
 
 @login_manager.user_loader
@@ -66,7 +66,7 @@ class Post(db.Model):
         return data
 
     def from_dict(self, data):
-        for field in ["post_filename", "user_id", "last_modified"]:
+        for field in ["user_id", "last_modified", "post_gdrive_id", "post_gdrive_name"]:
             if field in data:
                 setattr(self, field, data[field])
         # if new_post:
